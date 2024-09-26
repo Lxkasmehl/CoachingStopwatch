@@ -1,26 +1,32 @@
 package io.github.lxkasmehl.coachingstopwatch
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ListView
 import android.widget.Spinner
+import android.widget.TableLayout
+import android.widget.TableRow
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import java.util.Timer
 import java.util.TimerTask
-import io.github.lxkasmehl.coachingstopwatch.R
 
 
 class StopwatchActivity : AppCompatActivity() {
     private lateinit var timeTextView: TextView
-    private lateinit var lapListView: ListView
+    private lateinit var lapTable: TableLayout
     private lateinit var startButton: Button
     private lateinit var resetButton: Button
     private lateinit var lapButton: Button
+    private lateinit var trackLengthLayout: ConstraintLayout
+    private lateinit var positionLayout: ConstraintLayout
+    private lateinit var raceDistanceLayout: ConstraintLayout
+    private lateinit var goaltimeLayout: ConstraintLayout
     private lateinit var trackLengthSpinner: Spinner
     private lateinit var positionSpinner: Spinner
     private lateinit var raceDistanceSpinner: Spinner
@@ -31,20 +37,25 @@ class StopwatchActivity : AppCompatActivity() {
     private var lapTimes: MutableList<Long> = mutableListOf()
     private var isPaused = false
     private var pausedTime: Long = 0
+    private var averageLapTimeMilliseconds = 0
+    private var totalLapTime: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stopwatch)
 
         timeTextView = findViewById(R.id.time_textview)
-        lapListView = findViewById(R.id.lap_listview)
+        lapTable = findViewById(R.id.lap_table)
         startButton = findViewById(R.id.start_button)
         resetButton = findViewById(R.id.reset_button)
         lapButton = findViewById(R.id.lap_button)
         trackLengthSpinner = findViewById(R.id.track_length_spinner)
         positionSpinner = findViewById(R.id.position_spinner)
         raceDistanceSpinner = findViewById(R.id.race_distance_spinner)
-        val goaltimeLayout = findViewById<ConstraintLayout>(R.id.goaltime_layout)
+        trackLengthLayout = findViewById(R.id.track_length_layout)
+        positionLayout = findViewById(R.id.position_layout)
+        raceDistanceLayout = findViewById(R.id.race_distance_layout)
+        goaltimeLayout = findViewById(R.id.goaltime_layout)
         goaltimeEditText = goaltimeLayout.findViewById(R.id.goaltime_edittext)
 
         startButton.setOnClickListener {
@@ -66,29 +77,33 @@ class StopwatchActivity : AppCompatActivity() {
         resetButton.visibility = View.GONE
         lapButton.visibility = View.GONE
 
-        val track_length_adapter = ArrayAdapter.createFromResource(
+        setupSpinners()
+    }
+
+    private fun setupSpinners() {
+        val trackLengthAdapter = ArrayAdapter.createFromResource(
             this,
             R.array.track_length_options,
             android.R.layout.simple_spinner_item
         )
-        track_length_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        trackLengthSpinner.adapter = track_length_adapter
+        trackLengthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        trackLengthSpinner.adapter = trackLengthAdapter
 
-        val position_adapter = ArrayAdapter.createFromResource(
+        val positionAdapter = ArrayAdapter.createFromResource(
             this,
             R.array.position_options,
             android.R.layout.simple_spinner_item
         )
-        position_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        positionSpinner.adapter = position_adapter
+        positionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        positionSpinner.adapter = positionAdapter
 
-        val race_distance_adapter = ArrayAdapter.createFromResource(
+        val raceDistanceAdapter = ArrayAdapter.createFromResource(
             this,
             R.array.race_distance_options,
             android.R.layout.simple_spinner_item
         )
-        race_distance_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        raceDistanceSpinner.adapter = race_distance_adapter
+        raceDistanceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        raceDistanceSpinner.adapter = raceDistanceAdapter
     }
 
     private fun resumeTimer() {
@@ -114,6 +129,26 @@ class StopwatchActivity : AppCompatActivity() {
         startButton.text = getString(R.string.pause)
         resetButton.visibility = View.VISIBLE
         lapButton.visibility = View.VISIBLE
+
+        val goalTime = goaltimeEditText.text.toString()
+        var goalTimeTotalMilliseconds = 0
+        if (goalTime.matches(Regex("^(\\d{2}):(\\d{2}):(\\d{3})$"))) {
+            val goalTimeMinutes = goalTime.substring(0, 2).toInt()
+            val goalTimeSeconds = goalTime.substring(3, 5).toInt()
+            val goalTimeMilliseconds = goalTime.substring(6, 8).toInt()
+            goalTimeTotalMilliseconds = (goalTimeMinutes * 60 + goalTimeSeconds) * 1000 + goalTimeMilliseconds
+        } else {
+            Toast.makeText(this, "Invalid goal time format. Please use MM:ss:mmm", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val trackLengthString = trackLengthSpinner.selectedItem.toString()
+        val trackLength = trackLengthString.replace("m", "").toInt()
+
+        val raceDistanceString = raceDistanceSpinner.selectedItem.toString()
+        val raceDistance = raceDistanceString.replace("m", "").toInt()
+
+        averageLapTimeMilliseconds = (goalTimeTotalMilliseconds * trackLength) / raceDistance
 
         if (isPaused) {
             resumeTimer()
@@ -157,13 +192,17 @@ class StopwatchActivity : AppCompatActivity() {
         timer?.cancel()
         timer = null
         isPaused = false
-        lapListView.adapter = null
         val timer = Timer()
         timer.schedule(object : TimerTask() {
             override fun run() {
                 timeTextView.text = getString(R.string.default_time)
             }
         }, 50)
+
+        val rowCount = lapTable.childCount
+        for (i in rowCount - 1 downTo 1) {
+            lapTable.removeViewAt(i)
+        }
     }
 
 
@@ -171,9 +210,65 @@ class StopwatchActivity : AppCompatActivity() {
         val currentTime = System.currentTimeMillis()
         val lapTime = currentTime - startTime
         lapTimes.add(0, lapTime)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, lapTimes.map { String.format(getString(R.string.lap_time_format), it / 60000, (it % 60000) / 1000, it % 1000) })
+
+        var lapDiffTime = lapTime
+        if (lapTimes.size > 1) {
+            lapDiffTime = lapTime - lapTimes[1]
+        }
+
+        val lapAvgDiff = lapDiffTime - averageLapTimeMilliseconds
+        val totalTimeDiff = lapTime - (averageLapTimeMilliseconds * lapTimes.size)
+
         runOnUiThread {
-            lapListView.adapter = adapter
+            val row = TableRow(this)
+            row.layoutParams = TableLayout.LayoutParams(
+                TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT
+            )
+            row.setPadding(5, 10, 5, 10)
+
+            val lapTimeTextView = TextView(this)
+            lapTimeTextView.text = String.format(
+                getString(R.string.lap_time_format),
+                lapDiffTime / 60000,
+                lapDiffTime % 60000 / 1000,
+                lapDiffTime % 1000
+            )
+            lapTimeTextView.textSize = 16f
+            row.addView(lapTimeTextView)
+
+            val lapTimeDiffTextView = TextView(this)
+            lapTimeDiffTextView.text = String.format(
+                getString(R.string.lap_time_format),
+                lapAvgDiff / 60000,
+                lapAvgDiff % 60000 / 1000,
+                lapAvgDiff % 1000
+            )
+            lapTimeDiffTextView.textSize = 16f
+            row.addView(lapTimeDiffTextView)
+
+            val totalTimeTextView =
+                TextView(this)
+            totalTimeTextView.text = String.format(
+                getString(R.string.lap_time_format),
+                lapTime / 60000,
+                lapTime % 60000 / 1000,
+                lapTime % 1000
+            )
+            totalTimeTextView.textSize = 16f
+            row.addView(totalTimeTextView)
+
+            val totalTimeDiffTextView = TextView(this)
+            totalTimeDiffTextView.text = String.format(
+                getString(R.string.lap_time_format),
+                totalTimeDiff / 60000,
+                totalTimeDiff % 60000 / 1000,
+                totalTimeDiff % 1000
+            )
+            totalTimeDiffTextView.textSize = 16f
+            row.addView(totalTimeDiffTextView)
+
+            lapTable.addView(row, 1)
         }
     }
 }

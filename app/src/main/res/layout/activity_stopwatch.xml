@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    app:layout_constraintVertical_bias="1.0" >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/track_length_layout"
@@ -31,7 +31,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="1dp"
-            android:layout_marginRight="1dp"
             android:tooltipText="@string/track_length_tooltip_text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -63,7 +62,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="1dp"
-            android:layout_marginRight="1dp"
             android:tooltipText="@string/position_tooltip_text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -95,7 +93,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="1dp"
-            android:layout_marginRight="1dp"
             android:tooltipText="@string/race_distance_tooltip_text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -126,7 +123,7 @@
             android:id="@+id/goaltime_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="MM:SS:SS"
+            android:hint="MM:SS:SSS"
             android:inputType="time"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -179,16 +176,69 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/start_button" />
 
-    <ListView
-        android:id="@+id/lap_listview"
-        android:layout_width="201dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="50dp"
+    <ScrollView
+        android:layout_width="341dp"
+        android:layout_height="318dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:isScrollContainer="false"
         app:layout_constraintBottom_toTopOf="@+id/start_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/time_textview" />
+        app:layout_constraintTop_toBottomOf="@+id/time_textview">
+
+        <TableLayout
+            android:id="@+id/lap_table"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lap Time"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lap Time Diff"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Total Time"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Total Time Diff"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textAlignment="center" />
+
+            </TableRow>
+
+        </TableLayout>
+
+    </ScrollView>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
