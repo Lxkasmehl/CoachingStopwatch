@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="start">Start</string>
+    <string name="resume">Fortsetzen</string>
+    <string name="pause">Pause</string>
+    <string name="reset">Zurücksetzen</string>
+    <string name="lap">Runde</string>
+    <string name="track_length_description_text">Bahnlänge:</string>
+    <string name="position_description_text">Position der Zeitnahme:</string>
+    <string name="goaltime_description_text">Zielzeit:</string>
+    <string name="race_distance_description_text">Renndistanz:</string>
+</resources>

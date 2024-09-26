@@ -1,3 +1,39 @@
 <resources>
-    <string name="app_name">CoachingStopwatch</string>
+    <string name="app_name" translatable="false">CoachingStopwatch</string>
+    <string name="start">Start</string>
+    <string name="resume">Resume</string>
+    <string name="pause">Pause</string>
+    <string name="reset">Reset</string>
+    <string name="lap">Lap</string>
+    <string name="default_time" translatable="false">00:00:000</string>
+    <string name="lap_time_format" translatable="false">%02d:%02d:%03d</string>
+    <string-array name="track_length_options">
+        <item>200m</item>
+        <item>300m</item>
+        <item>400m</item>
+    </string-array>
+    <string name="track_length_description_text">Track length:</string>
+    <string name="track_length_tooltip_text" translatable="false">Lorem ipsum odor amet, consectetuer adipiscing elit. Euismod mollis elementum, cras nunc nostra aenean.</string>
+    <string-array name="position_options">
+        <item>Start/Finish</item>
+        <item>100m Start</item>
+        <item>200m Start</item>
+        <item>300m Start</item>
+    </string-array>
+    <string name="position_description_text">Timekeeping Position:</string>
+    <string name="position_tooltip_text" translatable="false">Lorem ipsum odor amet, consectetuer adipiscing elit. Euismod mollis elementum, cras nunc nostra aenean.</string>
+    <string name="goaltime_description_text">Goaltime:</string>
+    <string-array name="race_distance_options">
+        <item>800m</item>
+        <item>1500m</item>
+        <item>1600m</item>
+        <item>1 Mile</item>
+        <item>3000m</item>
+        <item>3200m</item>
+        <item>2 Mile</item>
+        <item>5000m</item>
+        <item>10000m</item>
+    </string-array>
+    <string name="race_distance_description_text">Race Distance:</string>
+    <string name="race_distance_tooltip_text" translatable="false">Lorem ipsum odor amet, consectetuer adipiscing elit. Euismod mollis elementum, cras nunc nostra aenean.</string>
 </resources>
