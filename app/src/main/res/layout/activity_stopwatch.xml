@@ -123,7 +123,7 @@
             android:id="@+id/goaltime_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="MM:SS:SSS"
+            android:hint="MM:ss:mmm"
             android:inputType="time"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"

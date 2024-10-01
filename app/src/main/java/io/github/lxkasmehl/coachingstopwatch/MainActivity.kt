@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import java.util.Timer
 import java.util.TimerTask
 
@@ -132,13 +133,26 @@ class StopwatchActivity : AppCompatActivity() {
 
         val goalTime = goaltimeEditText.text.toString()
         var goalTimeTotalMilliseconds = 0
-        if (goalTime.matches(Regex("^(\\d{2}):(\\d{2}):(\\d{3})$"))) {
+
+        if (goalTime.isEmpty()){
+            averageLapTimeMilliseconds = 0
+        } else if (goalTime.matches(Regex("^(\\d{2}):(\\d{2}):(\\d{3})$"))) {
+            // MM:ss:mmm format
             val goalTimeMinutes = goalTime.substring(0, 2).toInt()
             val goalTimeSeconds = goalTime.substring(3, 5).toInt()
             val goalTimeMilliseconds = goalTime.substring(6, 8).toInt()
             goalTimeTotalMilliseconds = (goalTimeMinutes * 60 + goalTimeSeconds) * 1000 + goalTimeMilliseconds
+        } else if (goalTime.matches(Regex("^(\\d+):(\\d{2})$"))) {
+            // M:ss format
+            val goalTimeMinutes = goalTime.substring(0, goalTime.indexOf(":")).toInt()
+            val goalTimeSeconds = goalTime.substring(goalTime.indexOf(":") + 1).toInt()
+            goalTimeTotalMilliseconds = (goalTimeMinutes * 60 + goalTimeSeconds) * 1000
+        } else if (goalTime.matches(Regex("^(\\d+)$"))) {
+            // Single number format (minutes)
+            val goalTimeMinutes = goalTime.toInt()
+            goalTimeTotalMilliseconds = goalTimeMinutes * 60 * 1000
         } else {
-            Toast.makeText(this, "Invalid goal time format. Please use MM:ss:mmm", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Invalid goal time format. Please use MM:ss:mmm, M:ss, or a single number", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -205,7 +219,6 @@ class StopwatchActivity : AppCompatActivity() {
         }
     }
 
-
     private fun lapTimer() {
         val currentTime = System.currentTimeMillis()
         val lapTime = currentTime - startTime
@@ -215,9 +228,6 @@ class StopwatchActivity : AppCompatActivity() {
         if (lapTimes.size > 1) {
             lapDiffTime = lapTime - lapTimes[1]
         }
-
-        val lapAvgDiff = lapDiffTime - averageLapTimeMilliseconds
-        val totalTimeDiff = lapTime - (averageLapTimeMilliseconds * lapTimes.size)
 
         runOnUiThread {
             val row = TableRow(this)
@@ -238,12 +248,20 @@ class StopwatchActivity : AppCompatActivity() {
             row.addView(lapTimeTextView)
 
             val lapTimeDiffTextView = TextView(this)
-            lapTimeDiffTextView.text = String.format(
-                getString(R.string.lap_time_format),
-                lapAvgDiff / 60000,
-                lapAvgDiff % 60000 / 1000,
-                lapAvgDiff % 1000
-            )
+            if (averageLapTimeMilliseconds == 0) {
+                lapTimeDiffTextView.text = ""
+            } else {
+                val lapAvgDiff = lapDiffTime - averageLapTimeMilliseconds
+                val diffSeconds = lapAvgDiff / 1000
+                val diffMilliseconds = lapAvgDiff % 1000
+                val diffString = if (lapAvgDiff < 0) {
+                    "-${-diffSeconds}.${String.format("%03d", -diffMilliseconds)}"
+                } else {
+                    "+${diffSeconds}.${String.format("%03d", diffMilliseconds)}"
+                }
+                lapTimeDiffTextView.text = diffString
+                lapTimeDiffTextView.setTextColor(ContextCompat.getColor(this, if (lapAvgDiff < 0) R.color.green else R.color.red))
+            }
             lapTimeDiffTextView.textSize = 16f
             row.addView(lapTimeDiffTextView)
 
@@ -259,12 +277,20 @@ class StopwatchActivity : AppCompatActivity() {
             row.addView(totalTimeTextView)
 
             val totalTimeDiffTextView = TextView(this)
-            totalTimeDiffTextView.text = String.format(
-                getString(R.string.lap_time_format),
-                totalTimeDiff / 60000,
-                totalTimeDiff % 60000 / 1000,
-                totalTimeDiff % 1000
-            )
+            if (averageLapTimeMilliseconds == 0) {
+                totalTimeDiffTextView.text = ""
+            } else {
+                val totalTimeDiff = lapTime - (averageLapTimeMilliseconds * lapTimes.size)
+                val diffSeconds = totalTimeDiff / 1000
+                val diffMilliseconds = totalTimeDiff % 1000
+                val diffString = if (totalTimeDiff < 0) {
+                    "-${-diffSeconds}.${String.format("%03d", -diffMilliseconds)}"
+                } else {
+                    "+${diffSeconds}.${String.format("%03d", diffMilliseconds)}"
+                }
+                totalTimeDiffTextView.text = diffString
+                totalTimeDiffTextView.setTextColor(ContextCompat.getColor(this, if (totalTimeDiff < 0) R.color.green else R.color.red))
+            }
             totalTimeDiffTextView.textSize = 16f
             row.addView(totalTimeDiffTextView)
 
