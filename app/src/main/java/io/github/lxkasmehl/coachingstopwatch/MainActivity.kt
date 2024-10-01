@@ -3,6 +3,7 @@ package io.github.lxkasmehl.coachingstopwatch
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
+import android.view.Gravity
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -39,7 +40,11 @@ class StopwatchActivity : AppCompatActivity() {
     private var isPaused = false
     private var pausedTime: Long = 0
     private var averageLapTimeMilliseconds = 0
-    private var totalLapTime: Long = 0
+    private var timeToFirstLap = 0
+    private var distanceToFirstLap = 0
+    private var trackLength = 0
+    private var positionToFinish = 0
+    private var raceStartPosition = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,7 +140,7 @@ class StopwatchActivity : AppCompatActivity() {
         var goalTimeTotalMilliseconds = 0
 
         if (goalTime.isEmpty()){
-            averageLapTimeMilliseconds = 0
+            goalTimeTotalMilliseconds = 0
         } else if (goalTime.matches(Regex("^(\\d{2}):(\\d{2}):(\\d{3})$"))) {
             // MM:ss:mmm format
             val goalTimeMinutes = goalTime.substring(0, 2).toInt()
@@ -157,12 +162,29 @@ class StopwatchActivity : AppCompatActivity() {
         }
 
         val trackLengthString = trackLengthSpinner.selectedItem.toString()
-        val trackLength = trackLengthString.replace("m", "").toInt()
+        trackLength = trackLengthString.replace("m", "").toInt()
 
         val raceDistanceString = raceDistanceSpinner.selectedItem.toString()
         val raceDistance = raceDistanceString.replace("m", "").toInt()
 
         averageLapTimeMilliseconds = (goalTimeTotalMilliseconds * trackLength) / raceDistance
+        
+        raceStartPosition = raceDistance % trackLength
+
+        val positionString = positionSpinner.selectedItem.toString()
+        positionToFinish = 0
+        if (positionString != "Finish") {
+            positionToFinish = positionString.replace("m Start", "").toInt()
+        }
+
+        distanceToFirstLap = if (raceStartPosition == positionToFinish) {
+            trackLength
+        } else if (raceStartPosition > positionToFinish){
+            raceStartPosition - positionToFinish
+        } else {
+            raceStartPosition + (trackLength - positionToFinish)
+        }
+        timeToFirstLap = (goalTimeTotalMilliseconds / raceDistance) * distanceToFirstLap
 
         if (isPaused) {
             resumeTimer()
@@ -229,6 +251,10 @@ class StopwatchActivity : AppCompatActivity() {
             lapDiffTime = lapTime - lapTimes[1]
         }
 
+        val isFirstLap = lapTimes.size == 1
+
+        val distanceCovered = if (isFirstLap) distanceToFirstLap else lapTimes.size * trackLength - positionToFinish
+
         runOnUiThread {
             val row = TableRow(this)
             row.layoutParams = TableLayout.LayoutParams(
@@ -236,6 +262,12 @@ class StopwatchActivity : AppCompatActivity() {
                 TableLayout.LayoutParams.WRAP_CONTENT
             )
             row.setPadding(5, 10, 5, 10)
+
+            val distanceTextView = TextView(this)
+            distanceTextView.text = "$distanceCovered m"
+            distanceTextView.textSize = 16f
+            distanceTextView.gravity = Gravity.CENTER_HORIZONTAL
+            row.addView(distanceTextView)
 
             val lapTimeTextView = TextView(this)
             lapTimeTextView.text = String.format(
@@ -245,13 +277,15 @@ class StopwatchActivity : AppCompatActivity() {
                 lapDiffTime % 1000
             )
             lapTimeTextView.textSize = 16f
+            lapTimeTextView.gravity = Gravity.CENTER_HORIZONTAL
             row.addView(lapTimeTextView)
 
             val lapTimeDiffTextView = TextView(this)
             if (averageLapTimeMilliseconds == 0) {
                 lapTimeDiffTextView.text = ""
             } else {
-                val lapAvgDiff = lapDiffTime - averageLapTimeMilliseconds
+                val lapDiffBase = if (isFirstLap) timeToFirstLap else averageLapTimeMilliseconds
+                val lapAvgDiff = lapDiffTime - lapDiffBase
                 val diffSeconds = lapAvgDiff / 1000
                 val diffMilliseconds = lapAvgDiff % 1000
                 val diffString = if (lapAvgDiff < 0) {
@@ -261,8 +295,9 @@ class StopwatchActivity : AppCompatActivity() {
                 }
                 lapTimeDiffTextView.text = diffString
                 lapTimeDiffTextView.setTextColor(ContextCompat.getColor(this, if (lapAvgDiff < 0) R.color.green else R.color.red))
+                lapTimeDiffTextView.textSize = 16f
+                lapTimeDiffTextView.gravity = Gravity.CENTER_HORIZONTAL
             }
-            lapTimeDiffTextView.textSize = 16f
             row.addView(lapTimeDiffTextView)
 
             val totalTimeTextView =
@@ -274,24 +309,27 @@ class StopwatchActivity : AppCompatActivity() {
                 lapTime % 1000
             )
             totalTimeTextView.textSize = 16f
+            totalTimeTextView.gravity = Gravity.CENTER_HORIZONTAL
             row.addView(totalTimeTextView)
 
             val totalTimeDiffTextView = TextView(this)
             if (averageLapTimeMilliseconds == 0) {
                 totalTimeDiffTextView.text = ""
             } else {
-                val totalTimeDiff = lapTime - (averageLapTimeMilliseconds * lapTimes.size)
-                val diffSeconds = totalTimeDiff / 1000
-                val diffMilliseconds = totalTimeDiff % 1000
-                val diffString = if (totalTimeDiff < 0) {
-                    "-${-diffSeconds}.${String.format("%03d", -diffMilliseconds)}"
+                val totalTimeDiffBase = timeToFirstLap + (lapTimes.size - 1) * averageLapTimeMilliseconds
+                val totalTimeDiff = lapTime - totalTimeDiffBase
+                val totalTimeDiffSeconds = totalTimeDiff / 1000
+                val totalTimeDiffMilliseconds = totalTimeDiff % 1000
+                val totalTimeDiffString = if (totalTimeDiff < 0) {
+                    "-${-totalTimeDiffSeconds}.${String.format("%03d", -totalTimeDiffMilliseconds)}"
                 } else {
-                    "+${diffSeconds}.${String.format("%03d", diffMilliseconds)}"
+                    "+${totalTimeDiffSeconds}.${String.format("%03d", totalTimeDiffMilliseconds)}"
                 }
-                totalTimeDiffTextView.text = diffString
+                totalTimeDiffTextView.text = totalTimeDiffString
                 totalTimeDiffTextView.setTextColor(ContextCompat.getColor(this, if (totalTimeDiff < 0) R.color.green else R.color.red))
+                totalTimeDiffTextView.textSize = 16f
+                totalTimeDiffTextView.gravity = Gravity.CENTER_HORIZONTAL
             }
-            totalTimeDiffTextView.textSize = 16f
             row.addView(totalTimeDiffTextView)
 
             lapTable.addView(row, 1)

@@ -15,7 +15,7 @@
     <string name="track_length_description_text">Track length:</string>
     <string name="track_length_tooltip_text" translatable="false">Lorem ipsum odor amet, consectetuer adipiscing elit. Euismod mollis elementum, cras nunc nostra aenean.</string>
     <string-array name="position_options">
-        <item>Start/Finish</item>
+        <item>Finish</item>
         <item>100m Start</item>
         <item>200m Start</item>
         <item>300m Start</item>
