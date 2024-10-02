@@ -1,8 +1,11 @@
 package io.github.lxkasmehl.coachingstopwatch
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.Gravity
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -14,6 +17,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.viewpager2.widget.ViewPager2
 import java.util.Locale
 import java.util.Timer
 import java.util.TimerTask
@@ -21,6 +25,7 @@ import java.util.TimerTask
 
 class StopwatchActivity : AppCompatActivity() {
     private lateinit var timeTextView: TextView
+    private lateinit var calculationsViewPager: ViewPager2
     private lateinit var lapTable: TableLayout
     private lateinit var startButton: Button
     private lateinit var resetButton: Button
@@ -45,6 +50,8 @@ class StopwatchActivity : AppCompatActivity() {
     private var trackLength = 0
     private var positionToFinish = 0
     private var raceStartPosition = 0
+    private var isStartTimer = false
+    private var goalTimeTotalMilliseconds = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +70,7 @@ class StopwatchActivity : AppCompatActivity() {
         raceDistanceLayout = findViewById(R.id.race_distance_layout)
         goaltimeLayout = findViewById(R.id.goaltime_layout)
         goaltimeEditText = goaltimeLayout.findViewById(R.id.goaltime_edittext)
+        calculationsViewPager = findViewById(R.id.calculations_viewpager)
 
         startButton.setOnClickListener {
             if (startButton.text == getString(R.string.start) || startButton.text == getString(R.string.resume)) {
@@ -84,6 +92,7 @@ class StopwatchActivity : AppCompatActivity() {
         lapButton.visibility = View.GONE
 
         setupSpinners()
+        updateCalculations()
     }
 
     private fun setupSpinners() {
@@ -110,6 +119,135 @@ class StopwatchActivity : AppCompatActivity() {
         )
         raceDistanceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         raceDistanceSpinner.adapter = raceDistanceAdapter
+
+        goaltimeEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                updateCalculations()
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        trackLengthSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateCalculations()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        raceDistanceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateCalculations()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        positionSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                updateCalculations()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun updateCalculations() {
+        val goalTime = goaltimeEditText.text.toString()
+
+        if (goalTime.isEmpty()){
+            goalTimeTotalMilliseconds = 0
+        } else if (goalTime.matches(Regex("^(\\d{2}):(\\d{2}):(\\d{3})$"))) {
+            // MM:ss:mmm format
+            val goalTimeMinutes = goalTime.substring(0, 2).toInt()
+            val goalTimeSeconds = goalTime.substring(3, 5).toInt()
+            val goalTimeMilliseconds = goalTime.substring(6, 8).toInt()
+            goalTimeTotalMilliseconds = (goalTimeMinutes * 60 + goalTimeSeconds) * 1000 + goalTimeMilliseconds
+        } else if (goalTime.matches(Regex("^(\\d+):(\\d{2}):(\\d{1,3})$"))) {
+            // M:ss:m oder M:ss:mm format
+            val goalTimeMinutes = goalTime.substring(0, goalTime.indexOf(":")).toInt()
+            val goalTimeSeconds = goalTime.substring(goalTime.indexOf(":") + 1, goalTime.lastIndexOf(":")).toInt()
+            val goalTimeMilliseconds = goalTime.substring(goalTime.lastIndexOf(":") + 1).toInt()
+            goalTimeTotalMilliseconds = (goalTimeMinutes * 60 + goalTimeSeconds) * 1000 + goalTimeMilliseconds
+        } else if (goalTime.matches(Regex("^(\\d+):(\\d{2})$"))) {
+            // M:ss format
+            val goalTimeMinutes = goalTime.substring(0, goalTime.indexOf(":")).toInt()
+            val goalTimeSeconds = goalTime.substring(goalTime.indexOf(":") + 1).toInt()
+            goalTimeTotalMilliseconds = (goalTimeMinutes * 60 + goalTimeSeconds) * 1000
+        } else if (goalTime.matches(Regex("^(\\d+)$"))) {
+            // Single number format (minutes)
+            val goalTimeMinutes = goalTime.toInt()
+            goalTimeTotalMilliseconds = goalTimeMinutes * 60 * 1000
+        } else if (isStartTimer) {
+            Toast.makeText(this, "Invalid goal time format. Please use MM:ss:mmm, M:ss:m, M:ss:mm, M:ss, or a single number", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val trackLengthString = trackLengthSpinner.selectedItem.toString()
+        trackLength = trackLengthString.replace("m", "").toInt()
+
+        val raceDistanceString = raceDistanceSpinner.selectedItem.toString()
+        val raceDistance = raceDistanceString.replace("m", "").toInt()
+
+        averageLapTimeMilliseconds = (goalTimeTotalMilliseconds * trackLength) / raceDistance
+
+        raceStartPosition = raceDistance % trackLength
+
+        val positionString = positionSpinner.selectedItem.toString()
+        positionToFinish = 0
+        if (positionString != "Finish") {
+            positionToFinish = positionString.replace("m Start", "").toInt()
+        }
+
+        distanceToFirstLap = if (raceStartPosition == positionToFinish) {
+            trackLength
+        } else if (raceStartPosition > positionToFinish){
+            raceStartPosition - positionToFinish
+        } else {
+            raceStartPosition + (trackLength - positionToFinish)
+        }
+        timeToFirstLap = (goalTimeTotalMilliseconds / raceDistance) * distanceToFirstLap
+
+        val calculations = mutableListOf<CalculationData>()
+        var currentPosition = distanceToFirstLap
+        var currentTime = timeToFirstLap
+        while (currentPosition < raceDistance) {
+            val avgLapTimeMinutes = averageLapTimeMilliseconds / 60000
+            val avgLapTimeSeconds = (averageLapTimeMilliseconds % 60000) / 1000
+            val avgLapTimeMilliseconds = averageLapTimeMilliseconds % 1000
+
+            val avgLapTimeString = String.format(
+                getString(R.string.lap_time_format),
+                avgLapTimeMinutes,
+                avgLapTimeSeconds,
+                avgLapTimeMilliseconds
+            )
+
+            val currentTimeMinutes = currentTime / 60000
+            val currentTimeSeconds = (currentTime % 60000) / 1000
+            val currentTimeMilliseconds = currentTime % 1000
+
+            val currentTimeString = String.format(
+                getString(R.string.lap_time_format),
+                currentTimeMinutes,
+                currentTimeSeconds,
+                currentTimeMilliseconds
+            )
+
+            val calculationData = CalculationData(
+                "$currentPosition m: $currentTimeString (avg lap time: $avgLapTimeString)"
+            )
+            calculations.add(calculationData)
+
+            currentPosition += trackLength
+            currentTime += averageLapTimeMilliseconds
+        }
+
+        val adapter = CalculationsPagerAdapter(calculations)
+        calculationsViewPager.adapter = adapter
     }
 
     private fun resumeTimer() {
@@ -132,59 +270,18 @@ class StopwatchActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        startButton.text = getString(R.string.pause)
-        resetButton.visibility = View.VISIBLE
-        lapButton.visibility = View.VISIBLE
+        isStartTimer = true
+        updateCalculations()
+        isStartTimer = false
 
         val goalTime = goaltimeEditText.text.toString()
-        val goalTimeTotalMilliseconds: Int
-
-        if (goalTime.isEmpty()){
-            goalTimeTotalMilliseconds = 0
-        } else if (goalTime.matches(Regex("^(\\d{2}):(\\d{2}):(\\d{3})$"))) {
-            // MM:ss:mmm format
-            val goalTimeMinutes = goalTime.substring(0, 2).toInt()
-            val goalTimeSeconds = goalTime.substring(3, 5).toInt()
-            val goalTimeMilliseconds = goalTime.substring(6, 8).toInt()
-            goalTimeTotalMilliseconds = (goalTimeMinutes * 60 + goalTimeSeconds) * 1000 + goalTimeMilliseconds
-        } else if (goalTime.matches(Regex("^(\\d+):(\\d{2})$"))) {
-            // M:ss format
-            val goalTimeMinutes = goalTime.substring(0, goalTime.indexOf(":")).toInt()
-            val goalTimeSeconds = goalTime.substring(goalTime.indexOf(":") + 1).toInt()
-            goalTimeTotalMilliseconds = (goalTimeMinutes * 60 + goalTimeSeconds) * 1000
-        } else if (goalTime.matches(Regex("^(\\d+)$"))) {
-            // Single number format (minutes)
-            val goalTimeMinutes = goalTime.toInt()
-            goalTimeTotalMilliseconds = goalTimeMinutes * 60 * 1000
-        } else {
-            Toast.makeText(this, "Invalid goal time format. Please use MM:ss:mmm, M:ss, or a single number", Toast.LENGTH_SHORT).show()
+        if (goalTimeTotalMilliseconds == 0 && goalTime.isNotEmpty()) {
             return
         }
 
-        val trackLengthString = trackLengthSpinner.selectedItem.toString()
-        trackLength = trackLengthString.replace("m", "").toInt()
-
-        val raceDistanceString = raceDistanceSpinner.selectedItem.toString()
-        val raceDistance = raceDistanceString.replace("m", "").toInt()
-
-        averageLapTimeMilliseconds = (goalTimeTotalMilliseconds * trackLength) / raceDistance
-        
-        raceStartPosition = raceDistance % trackLength
-
-        val positionString = positionSpinner.selectedItem.toString()
-        positionToFinish = 0
-        if (positionString != "Finish") {
-            positionToFinish = positionString.replace("m Start", "").toInt()
-        }
-
-        distanceToFirstLap = if (raceStartPosition == positionToFinish) {
-            trackLength
-        } else if (raceStartPosition > positionToFinish){
-            raceStartPosition - positionToFinish
-        } else {
-            raceStartPosition + (trackLength - positionToFinish)
-        }
-        timeToFirstLap = (goalTimeTotalMilliseconds / raceDistance) * distanceToFirstLap
+        startButton.text = getString(R.string.pause)
+        resetButton.visibility = View.VISIBLE
+        lapButton.visibility = View.VISIBLE
 
         if (isPaused) {
             resumeTimer()

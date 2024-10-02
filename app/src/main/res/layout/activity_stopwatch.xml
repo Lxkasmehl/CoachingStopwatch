@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,7 +11,7 @@
         android:id="@+id/track_length_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintHorizontal_bias="0.75"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +42,7 @@
         android:id="@+id/position_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.25"
         app:layout_constraintStart_toStartOf="@+id/guideline"
@@ -72,11 +73,11 @@
         android:id="@+id/race_distance_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/time_textview"
+        android:layout_marginTop="30dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintHorizontal_bias="0.76"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline2">
+        app:layout_constraintTop_toBottomOf="@+id/track_length_layout">
 
         <TextView
             android:id="@+id/race_distance_description_textview"
@@ -103,11 +104,11 @@
         android:id="@+id/goaltime_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/time_textview"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.25"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toTopOf="@+id/guideline2">
+        app:layout_constraintTop_toBottomOf="@+id/position_layout">
 
         <TextView
             android:id="@+id/goaltime_description_textview"
@@ -123,10 +124,10 @@
             android:id="@+id/goaltime_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:autofillHints="time"
             android:hint="@string/goaltime_hint"
             android:inputType="time"
             android:textSize="16sp"
-            android:autofillHints="time"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -137,7 +138,7 @@
         android:id="@+id/time_textview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="260dp"
         android:text="@string/default_time"
         android:textAlignment="center"
         android:textSize="48sp"
@@ -178,9 +179,10 @@
         app:layout_constraintStart_toEndOf="@+id/start_button" />
 
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="394dp"
-        android:layout_height="320dp"
-        android:layout_marginTop="30dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
         android:layout_marginBottom="30dp"
         android:isScrollContainer="false"
         app:layout_constraintBottom_toTopOf="@+id/start_button"
@@ -257,11 +259,23 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.50121653" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline2"
+    <TextView
+        android:id="@+id/calculations_description_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="82dp" />
+        android:layout_marginBottom="20dp"
+        android:text="@string/calculations_description"
+        app:layout_constraintBottom_toTopOf="@+id/calculations_viewpager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/calculations_viewpager"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/time_textview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

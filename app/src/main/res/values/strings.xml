@@ -36,11 +36,12 @@
     </string-array>
     <string name="race_distance_description_text">Race Distance:</string>
     <string name="race_distance_tooltip_text" translatable="false">Lorem ipsum odor amet, consectetuer adipiscing elit. Euismod mollis elementum, cras nunc nostra aenean.</string>
-    <string name="distance_covered">%d m</string>
+    <string name="distance_covered" translatable="false">%d m</string>
     <string name="goaltime_hint" translatable="false">MM:ss:mmm</string>
     <string name="table_distance_column_header">Distance</string>
     <string name="table_lap_time_column_header">Lap Time</string>
     <string name="table_lap_time_diff_column_header">Lap Time Diff</string>
     <string name="table_total_time_column_header">Total Time</string>
     <string name="table_total_time_diff_column_header">Total Time Diff</string>
+    <string name="calculations_description">The runner will pass you at these times:</string>
 </resources>
