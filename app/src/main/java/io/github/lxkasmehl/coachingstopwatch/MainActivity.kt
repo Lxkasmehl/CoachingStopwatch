@@ -190,7 +190,13 @@ class StopwatchActivity : AppCompatActivity() {
         trackLength = trackLengthString.replace("m", "").toInt()
 
         val raceDistanceString = raceDistanceSpinner.selectedItem.toString()
-        val raceDistance = raceDistanceString.replace("m", "").toInt()
+        var raceDistance = 0
+        if (raceDistanceString.endsWith("m")) {
+            raceDistance = raceDistanceString.replace("m", "").toInt()
+        } else if (raceDistanceString.endsWith(" Mile")) {
+            val miles = raceDistanceString.replace(" Mile", "").toInt()
+            raceDistance = (miles * 1609.34).toInt()
+        }
 
         averageLapTimeMilliseconds = (goalTimeTotalMilliseconds * trackLength) / raceDistance
 
@@ -238,7 +244,7 @@ class StopwatchActivity : AppCompatActivity() {
             )
 
             val calculationData = CalculationData(
-                "$currentPosition m: $currentTimeString (avg lap time: $avgLapTimeString)"
+                "<- $currentPosition m: $currentTimeString (avg lap time: $avgLapTimeString) ->"
             )
             calculations.add(calculationData)
 
