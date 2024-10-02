@@ -9,4 +9,10 @@
     <string name="position_description_text">Position der Zeitnahme:</string>
     <string name="goaltime_description_text">Zielzeit:</string>
     <string name="race_distance_description_text">Renndistanz:</string>
+    <string name="distance_covered">%d m</string>
+    <string name="table_distance_column_header">Distanz</string>
+    <string name="table_lap_time_column_header">Rundenzeit</string>
+    <string name="table_lap_time_diff_column_header">Rundenzeit diff</string>
+    <string name="table_total_time_column_header">Gesamtzeit</string>
+    <string name="table_total_time_diff_column_header">Gesamtzeit diff</string>
 </resources>

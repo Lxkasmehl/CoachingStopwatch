@@ -5,8 +5,8 @@
     <string name="pause">Pause</string>
     <string name="reset">Reset</string>
     <string name="lap">Lap</string>
-    <string name="default_time" translatable="false">00:00:000</string>
-    <string name="lap_time_format" translatable="false">%02d:%02d:%03d</string>
+    <string name="default_time" translatable="false">00:00.000</string>
+    <string name="lap_time_format" translatable="false">%02d:%02d.%03d</string>
     <string-array name="track_length_options">
         <item>200m</item>
         <item>300m</item>
@@ -36,4 +36,11 @@
     </string-array>
     <string name="race_distance_description_text">Race Distance:</string>
     <string name="race_distance_tooltip_text" translatable="false">Lorem ipsum odor amet, consectetuer adipiscing elit. Euismod mollis elementum, cras nunc nostra aenean.</string>
+    <string name="distance_covered">%d m</string>
+    <string name="goaltime_hint" translatable="false">MM:ss:mmm</string>
+    <string name="table_distance_column_header">Distance</string>
+    <string name="table_lap_time_column_header">Lap Time</string>
+    <string name="table_lap_time_diff_column_header">Lap Time Diff</string>
+    <string name="table_total_time_column_header">Total Time</string>
+    <string name="table_total_time_diff_column_header">Total Time Diff</string>
 </resources>

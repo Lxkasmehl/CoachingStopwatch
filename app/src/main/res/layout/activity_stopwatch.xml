@@ -123,9 +123,10 @@
             android:id="@+id/goaltime_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="MM:ss:mmm"
+            android:hint="@string/goaltime_hint"
             android:inputType="time"
             android:textSize="16sp"
+            android:autofillHints="time"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -202,7 +203,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Distance"
+                    android:text="@string/table_distance_column_header"
                     android:textAlignment="center"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -211,7 +212,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Lap Time"
+                    android:text="@string/table_lap_time_column_header"
                     android:textAlignment="center"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -220,7 +221,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Lap Time Diff"
+                    android:text="@string/table_lap_time_diff_column_header"
                     android:textAlignment="center"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -229,7 +230,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Total Time"
+                    android:text="@string/table_total_time_column_header"
                     android:textAlignment="center"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -238,7 +239,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Total Time Diff"
+                    android:text="@string/table_total_time_diff_column_header"
                     android:textAlignment="center"
                     android:textSize="14sp"
                     android:textStyle="bold" />

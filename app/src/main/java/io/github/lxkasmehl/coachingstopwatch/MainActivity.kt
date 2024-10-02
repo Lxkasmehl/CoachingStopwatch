@@ -1,6 +1,5 @@
 package io.github.lxkasmehl.coachingstopwatch
 
-import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.view.Gravity
@@ -15,6 +14,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import java.util.Locale
 import java.util.Timer
 import java.util.TimerTask
 
@@ -137,7 +137,7 @@ class StopwatchActivity : AppCompatActivity() {
         lapButton.visibility = View.VISIBLE
 
         val goalTime = goaltimeEditText.text.toString()
-        var goalTimeTotalMilliseconds = 0
+        val goalTimeTotalMilliseconds: Int
 
         if (goalTime.isEmpty()){
             goalTimeTotalMilliseconds = 0
@@ -253,7 +253,7 @@ class StopwatchActivity : AppCompatActivity() {
 
         val isFirstLap = lapTimes.size == 1
 
-        val distanceCovered = if (isFirstLap) distanceToFirstLap else lapTimes.size * trackLength - positionToFinish
+        val distanceCovered = if (isFirstLap) distanceToFirstLap else (lapTimes.size-1) * trackLength + distanceToFirstLap
 
         runOnUiThread {
             val row = TableRow(this)
@@ -264,7 +264,7 @@ class StopwatchActivity : AppCompatActivity() {
             row.setPadding(5, 10, 5, 10)
 
             val distanceTextView = TextView(this)
-            distanceTextView.text = "$distanceCovered m"
+            distanceTextView.text = getString(R.string.distance_covered, distanceCovered)
             distanceTextView.textSize = 16f
             distanceTextView.gravity = Gravity.CENTER_HORIZONTAL
             row.addView(distanceTextView)
@@ -289,9 +289,9 @@ class StopwatchActivity : AppCompatActivity() {
                 val diffSeconds = lapAvgDiff / 1000
                 val diffMilliseconds = lapAvgDiff % 1000
                 val diffString = if (lapAvgDiff < 0) {
-                    "-${-diffSeconds}.${String.format("%03d", -diffMilliseconds)}"
+                    "-${-diffSeconds}.${String.format(Locale.getDefault(), "%03d", -diffMilliseconds)}"
                 } else {
-                    "+${diffSeconds}.${String.format("%03d", diffMilliseconds)}"
+                    "+${diffSeconds}.${String.format(Locale.getDefault(), "%03d", diffMilliseconds)}"
                 }
                 lapTimeDiffTextView.text = diffString
                 lapTimeDiffTextView.setTextColor(ContextCompat.getColor(this, if (lapAvgDiff < 0) R.color.green else R.color.red))
@@ -321,9 +321,9 @@ class StopwatchActivity : AppCompatActivity() {
                 val totalTimeDiffSeconds = totalTimeDiff / 1000
                 val totalTimeDiffMilliseconds = totalTimeDiff % 1000
                 val totalTimeDiffString = if (totalTimeDiff < 0) {
-                    "-${-totalTimeDiffSeconds}.${String.format("%03d", -totalTimeDiffMilliseconds)}"
+                    "-${-totalTimeDiffSeconds}.${String.format(Locale.getDefault(), "%03d", -totalTimeDiffMilliseconds)}"
                 } else {
-                    "+${totalTimeDiffSeconds}.${String.format("%03d", totalTimeDiffMilliseconds)}"
+                    "+${totalTimeDiffSeconds}.${String.format(Locale.getDefault(), "%03d", totalTimeDiffMilliseconds)}"
                 }
                 totalTimeDiffTextView.text = totalTimeDiffString
                 totalTimeDiffTextView.setTextColor(ContextCompat.getColor(this, if (totalTimeDiff < 0) R.color.green else R.color.red))
