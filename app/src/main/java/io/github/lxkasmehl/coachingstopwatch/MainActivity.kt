@@ -9,6 +9,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TableLayout
 import android.widget.TableRow
@@ -38,6 +40,9 @@ class StopwatchActivity : AppCompatActivity() {
     private lateinit var positionSpinner: Spinner
     private lateinit var raceDistanceSpinner: Spinner
     private lateinit var goaltimeEditText: EditText
+    private lateinit var leftArrow: ImageButton
+    private lateinit var rightArrow: ImageButton
+    private lateinit var indicatorContainer: LinearLayout
 
     private var timer: Timer? = null
     private var startTime: Long = 0
@@ -71,6 +76,9 @@ class StopwatchActivity : AppCompatActivity() {
         goaltimeLayout = findViewById(R.id.goaltime_layout)
         goaltimeEditText = goaltimeLayout.findViewById(R.id.goaltime_edittext)
         calculationsViewPager = findViewById(R.id.calculations_viewpager)
+        leftArrow = findViewById(R.id.left_arrow)
+        rightArrow = findViewById(R.id.right_arrow)
+        indicatorContainer = findViewById(R.id.indicator_container)
 
         startButton.setOnClickListener {
             if (startButton.text == getString(R.string.start) || startButton.text == getString(R.string.resume)) {
@@ -86,6 +94,20 @@ class StopwatchActivity : AppCompatActivity() {
 
         lapButton.setOnClickListener {
             lapTimer()
+        }
+
+        leftArrow.setOnClickListener {
+            val currentItem = calculationsViewPager.currentItem
+            if (currentItem > 0) {
+                calculationsViewPager.setCurrentItem(currentItem - 1, true)
+            }
+        }
+
+        rightArrow.setOnClickListener {
+            val currentItem = calculationsViewPager.currentItem
+            if (currentItem < calculationsViewPager.adapter?.itemCount!! - 1) {
+                calculationsViewPager.setCurrentItem(currentItem + 1, true)
+            }
         }
 
         resetButton.visibility = View.GONE
@@ -244,7 +266,7 @@ class StopwatchActivity : AppCompatActivity() {
             )
 
             val calculationData = CalculationData(
-                "<- $currentPosition m: $currentTimeString (avg lap time: $avgLapTimeString) ->"
+                "$currentPosition m: $currentTimeString (avg lap time: $avgLapTimeString)"
             )
             calculations.add(calculationData)
 
@@ -254,6 +276,58 @@ class StopwatchActivity : AppCompatActivity() {
 
         val adapter = CalculationsPagerAdapter(calculations)
         calculationsViewPager.adapter = adapter
+
+        indicatorContainer.orientation = LinearLayout.HORIZONTAL
+        indicatorContainer.removeAllViews()
+
+        for (i in 0 until adapter.itemCount) {
+            val dot = View(this)
+            val params = LinearLayout.LayoutParams(
+                16,
+                16
+            )
+            params.setMargins(8, 0, 8, 0)
+            dot.layoutParams = params
+            dot.setBackgroundResource(R.drawable.indicator_dot_default)
+            indicatorContainer.addView(dot)
+        }
+
+        if (indicatorContainer.childCount > 0) {
+            val firstDot = indicatorContainer.getChildAt(0)
+            val params = LinearLayout.LayoutParams(
+                28,
+                28
+            )
+            params.setMargins(8, 0, 8, 0)
+            firstDot.layoutParams = params
+            firstDot.setBackgroundResource(R.drawable.indicator_dot_active)
+        }
+
+        calculationsViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                for (i in 0 until indicatorContainer.childCount) {
+                    val dot = indicatorContainer.getChildAt(i)
+                    if (i == position) {
+                        val params = LinearLayout.LayoutParams(
+                            28,
+                            28
+                        )
+                        params.setMargins(8, 0, 8, 0)
+                        dot.setBackgroundResource(R.drawable.indicator_dot_active)
+                        dot.layoutParams = params
+                    } else {
+                        val params = LinearLayout.LayoutParams(
+                            16,
+                            16
+                        )
+                        params.setMargins(8, 0, 8, 0)
+                        dot.layoutParams = params
+                        dot.setBackgroundResource(R.drawable.indicator_dot_default)
+                    }
+                }
+            }
+        })
     }
 
     private fun resumeTimer() {
