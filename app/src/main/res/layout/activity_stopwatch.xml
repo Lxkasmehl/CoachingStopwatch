@@ -150,8 +150,8 @@
 
     <Button
         android:id="@+id/start_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginBottom="30dp"
         android:text="@string/start"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -160,8 +160,8 @@
 
     <Button
         android:id="@+id/reset_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginBottom="30dp"
         android:text="@string/reset"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -170,8 +170,8 @@
 
     <Button
         android:id="@+id/lap_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginBottom="30dp"
         android:text="@string/lap"
         app:layout_constraintBottom_toBottomOf="parent"
