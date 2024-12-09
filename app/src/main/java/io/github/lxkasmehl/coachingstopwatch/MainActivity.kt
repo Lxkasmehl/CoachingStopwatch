@@ -1,6 +1,9 @@
 package io.github.lxkasmehl.coachingstopwatch
 
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -86,14 +89,17 @@ class StopwatchActivity : AppCompatActivity() {
             } else {
                 pauseTimer()
             }
+            vibrateHapticClick()
         }
 
         resetButton.setOnClickListener {
             stopTimer()
+            vibrateHapticClick()
         }
 
         lapButton.setOnClickListener {
             lapTimer()
+            vibrateHapticClick()
         }
 
         leftArrow.setOnClickListener {
@@ -116,6 +122,24 @@ class StopwatchActivity : AppCompatActivity() {
         setupSpinners()
         updateCalculations()
     }
+
+    private fun vibrateHapticClick() {
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+        if (vibrator.hasVibrator()) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val vibrationEffect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
+                vibrator.vibrate(vibrationEffect)
+            } else {
+                val vibrationEffect = VibrationEffect.createOneShot(
+                    10,
+                    VibrationEffect.DEFAULT_AMPLITUDE
+                )
+                vibrator.vibrate(vibrationEffect)
+            }
+        }
+    }
+
 
     private fun setupSpinners() {
         val trackLengthAdapter = ArrayAdapter.createFromResource(
