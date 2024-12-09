@@ -25,6 +25,7 @@
     <string name="goaltime_description_text">Goaltime:</string>
     <string-array name="race_distance_options">
         <item>800m</item>
+        <item>1000m</item>
         <item>1500m</item>
         <item>1600m</item>
         <item>1 Mile</item>
