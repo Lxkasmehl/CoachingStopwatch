@@ -1,3 +1,7 @@
+# CoachingStopwatch
+
+An Android app written in Kotlin.
+
 A simple stopwatch app designed for coaches to track athlete performance during track and field events.
 
 # Features
